@@ -210,58 +210,7 @@ async def rename_channel(session, channel_id, new_channel_name):
             print(f"\x1b[38;5;56m[\033[37m+\x1b[38;5;56m]\033[37m Renamed Channel\x1b[38;5;56m {channel_id}\033[37m")
         else:
             colors.warning("Failed To Rename Channel")
-
-async def delete_all_emojis(guild_id):
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=10)) as session:
-        emoji_data = await get_emoji_data(guild_id, session)
-        
-        if emoji_data is not None:
-            emoji_ids = [emoji["id"] for emoji in emoji_data]
-            await delete_emojis(guild_id, emoji_ids, session)
-        else:
-            print("Failed to retrieve emoji data")
-
-async def get_emoji_data(guild_id, session):
-    async with session.get(f"https://canary.discord.com/api/v10/guilds/{guild_id}/emojis") as res:
-        if res.status == 200:
-            return await res.json()
-        else:
-            print(f"Failed to retrieve emoji data, Status Code: {res.status}")
-            return None
-
-async def delete_emojis(guild_id, emoji_ids, session):
-    for emoji_id in emoji_ids:
-        async with session.delete(f"https://canary.discord.com/api/v10/guilds/{guild_id}/emojis/{emoji_id}", headers=headers) as res:
-            if res.status in [200, 204, 201]:
-                print(f'\x1b[38;5;56m[\033[37m+\x1b[38;5;56m]\033[37m Deleted Emoji\x1b[38;5;56m {emoji_id}\033[37m')
-            else:
-                print(f"Failed to delete emoji {emoji_id}, Status Code: {res.status}")
-
-async def mute_all_members(target_guild_id):
-    try:
-        # Get the target guild object
-        target_guild = client.get_guild(target_guild_id)
-        if target_guild is None:
-            print("Target guild not found.")
-            return
-
-        tasks = []
-        for member in target_guild.members:
-            task = asyncio.create_task(mute_member(member))
-            tasks.append(task)
-
-        await asyncio.gather(*tasks)
-        print("All members in the target guild have been muted.")
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-
-async def mute_member(member):
-    try:
-        await member.edit(mute=True)
-        print(f"Muted {member.name}#{member.discriminator}")
-    except discord.Forbidden:
-        print(f"Failed to mute {member.name}#{member.discriminator} (permission denied)")
-
+          
 async def spam():
     try:
         guild_id = int(input("\x1b[38;5;56m[\033[37m+\x1b[38;5;56m]\033[37m Guild Id: \x1b[38;5;56m \033[37m"))
@@ -393,9 +342,6 @@ async def main():
       file_path = "ids.txt"
       guild_id = int(input("\x1b[38;5;56m[\033[37m+\x1b[38;5;56m]\033[37m Guild Id: \x1b[38;5;56m \033[37m"))
       await ban_ids_from_file(guild_id, file_path)
-    elif option == 13:
-      guild_id = int(input("Enter the target guild ID: "))
-      await mute_all_members(guild_id)
     elif option == 69:
        clear_file("idk.txt")
 
